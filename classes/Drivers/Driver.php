@@ -1,8 +1,7 @@
-<?php
+<?php defined('SYSPATH') or die('No direct script access.');
 
-defined('SYSPATH') or die('No direct script access.');
-
-abstract class Drivers_Driver {
+abstract class Drivers_Driver
+{
 
     /**
      * Valid types
@@ -102,7 +101,8 @@ abstract class Drivers_Driver {
      *
      * @param  Database_Core
      */
-    public function __construct($group, $db) {
+    public function __construct($group, $db)
+    {
         $db_config = Kohana::$config->load('database');
 
         $this->group = $group;
@@ -117,7 +117,8 @@ abstract class Drivers_Driver {
      * 
      * @return string primary key
      */
-    public function get_primary_key() {
+    public function get_primary_key()
+    {
         return $this->primary_key;
     }
 
@@ -310,10 +311,11 @@ abstract class Drivers_Driver {
      *
      * @return bool
      */
-    public function run_query($sql) {
+    public function run_query($sql)
+    {
         try {
             $test = $this->db->query($this->group, $sql, false);
-        } catch (Kohana_Database_Exception $e) {
+        } catch (Database_Exception $e) {
             // Kohana::log('error', 'Migration Failed: ' . $e);
             echo $e->getMessage();
             exit();
@@ -327,10 +329,14 @@ abstract class Drivers_Driver {
      *
      * @return bool
      */
-    protected function is_type($type, $platform) {
-        if (isset($this->types[$type][$platform]))
-            return $this->types[$type][$platform];
-        return false;
+    protected function is_type($type, $platform)
+    {
+        if ( ! isset($this->types[$type][$platform]) )
+        {
+            return false;
+        }
+
+        return $this->types[$type][$platform];
     }
 
     /**
@@ -450,7 +456,8 @@ abstract class Drivers_Driver {
      * End Transaction
      * 
      */
-    public function commit() {
+    public function commit()
+    {
         $this->run_query('COMMIT');
     }
 

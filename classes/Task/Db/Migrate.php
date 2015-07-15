@@ -1,9 +1,7 @@
-    
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
-
-class Task_Db_Migrate extends Minion_Task {
+<?php defined('SYSPATH') or die('No direct script access.');
+ 
+class Task_Db_Migrate extends Minion_Task
+{
 
     protected $_options = array(
         'db' => 'default',
@@ -16,7 +14,8 @@ class Task_Db_Migrate extends Minion_Task {
      *
      * @return null
      */
-    protected function _execute(array $params) {
+    protected function _execute(array $params)
+	{
         $migrations = new Coolmigrations(TRUE);
         Database::$default = $params['db'];
         $db_config = Kohana::$config->load('database');
@@ -51,13 +50,21 @@ class Task_Db_Migrate extends Minion_Task {
 
         $messages = $migrations->migrate($params['db'], $params['step']);
 
-        if (empty($messages)) {
+        if (empty($messages))
+        {
             Minion_CLI::write("Nothing to migrate");
-        } else {
-            foreach ($messages as $message) {
-                if (key($message) == 0) {
+        }
+        else
+        {
+            foreach ($messages as $message)
+            {
+                if (key($message) == 0)
+                {
                     Minion_CLI::write($message[0]);
-                } else {
+                    Minion_CLI::write("OK");
+                }
+                else
+                { 
                     Minion_CLI::write($message[key($message)]);
                     Minion_CLI::write("ERROR");
                 }

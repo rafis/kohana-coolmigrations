@@ -1,6 +1,4 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Migrations
@@ -20,18 +18,19 @@ defined('SYSPATH') or die('No direct script access.');
  * @author		Matías Montes
  * @author      Jamie Madill
  */
-class Migration {
+class Migration
+{
 
     protected $driver;
     protected $db;
-    // if use change method is true
-    protected $change_exists = false;
+    
     // Override these two parameters to set behaviour of your migration
     private $group = 'default';
+    private $output = FALSE;
 
-    public function __construct($group = 'default', $change_exists = false) {
+    public function __construct($output = FALSE, $group = 'default')
+    {
         $this->db = Database::instance($group);
-        $this->change_exists = $change_exists;
         $db_config = Kohana::$config->load('database');
 
         // if need call driver with specific name
@@ -50,40 +49,26 @@ class Migration {
         $driver = 'Drivers_' . $platform;
 
         $this->driver = new $driver($group, $this->db);
+        $this->output = $output;
         $this->group = $group;
     }
-
-    public function up() {
-        if ($this->change_exists) {
-            $this->change_exists = !$this->change_exists;
-            return $this->change();
-        }
+    
+    protected function log($string)
+    {
+        if ($this->output)
+            echo $string;
+    }
+    
+    public function up()
+    {
         throw new Kohana_Exception('migrations.abstract');
     }
 
-    public function down() {
-        if ($this->change_exists)
-            return $this->change();
+    public function down()
+    {
         throw new Kohana_Exception('migrations.abstract');
     }
-
-    /**
-     * up/down function if possible
-     * @throws Kohana_Exception
-     */
-    public function change() {
-        throw new Kohana_Exception('migrations.abstract');
-    }
-
-    private function change_exception() {
-        try {
-            $this->change_exists;
-        } catch (Database_Exception $a) {
-            Minion_CLI::write('Method "change" not supported for this action');
-            exit();
-        }
-    }
-
+    
     /**
      * Create Table
      *
@@ -116,13 +101,11 @@ class Migration {
      *                   Will be set to auto_increment, serial, etc.
      * @return	boolean
      */
-    public function create_table($table_name, $fields, $primary_key = TRUE) {
-        if (!$this->change_exists)
-            $ret = $this->driver->create_table($table_name, $fields, $primary_key);
-        else {
-            $this->change_exists = !$this->change_exists;
-            $ret = $this->drop_table($table_name);
-        }
+    public function create_table($table_name, $fields, $primary_key = TRUE)
+    {
+        $this->log("Creating table '$table_name'...");
+        $ret = $this->driver->create_table($table_name, $fields, $primary_key);
+        $this->log("DONE<br />");
         return $ret;
     }
 
@@ -132,9 +115,11 @@ class Migration {
      * @param string    Name of the table
      * @return boolean
      */
-    public function drop_table($table_name) {
-        $this->change_exception();
+    public function drop_table($table_name)
+    {
+        $this->log("Dropping table '$table_name'...");
         $ret = $this->driver->drop_table($table_name);
+        $this->log("DONE<br />");
         return $ret;
     }
 
@@ -145,16 +130,14 @@ class Migration {
      * @param   string    New name
      * @return  boolean
      */
-    public function rename_table($old_name, $new_name) {
-        if (!$this->change_exists)
-            $ret = $this->driver->rename_table($old_name, $new_name);
-        else {
-            $this->change_exists = !$this->change_exists;
-            $ret = $this->driver->rename_table($new_name, $old_name);
-        }
+    public function rename_table($old_name, $new_name)
+    {
+        $this->log("Renaming table '$old_name' to '$new_name'...");
+        $ret = $this->driver->rename_table($old_name, $new_name);
+        $this->log("DONE<br />");
         return $ret;
     }
-
+    
     /**
      * Add a column to a table
      *
@@ -166,16 +149,14 @@ class Migration {
      * @param   array   Column arguments array
      * @return  bool
      */
-    public function add_column($table_name, $column_name, $params) {
-        if (!$this->change_exists)
-            $ret = $this->driver->add_column($table_name, $column_name, $params);
-        else {
-            $this->change_exists = !$this->change_exists;
-            $ret = $this->driver->remove_column($table_name, $column_name);
-        }
+    public function add_column($table_name, $column_name, $params)
+    {
+        $this->log("Adding column '$column_name' to table '$table_name'...");
+        $ret = $this->driver->add_column($table_name, $column_name, $params);
+        $this->log("DONE<br />");
         return $ret;
     }
-
+    
     /**
      * Rename a column
      *
@@ -184,16 +165,14 @@ class Migration {
      * @param   string  New name
      * @return  bool
      */
-    public function rename_column($table_name, $column_name, $new_column_name, $params = NULL) {
-        if (!$this->change_exists)
-            $ret = $this->driver->rename_column($table_name, $column_name, $new_column_name, $params);
-        else {
-            $this->change_exists = !$this->change_exists;
-            $ret = $this->driver->rename_column($table_name, $new_column_name, $column_name, $params);
-        }
+    public function rename_column($table_name, $column_name, $new_column_name, $params)
+    {
+        $this->log("Renaming column '$column_name' in table '$table_name' to '$new_column_name'...");
+        $ret = $this->driver->rename_column($table_name, $column_name, $new_column_name, $params);
+        $this->log("DONE<br />");
         return $ret;
     }
-
+    
     /**
      * Alter a column
      *
@@ -202,12 +181,14 @@ class Migration {
      * @param   array   Column arguments
      * @return  bool
      */
-    public function change_column($table_name, $column_name, $params) {
-        $this->change_exception();
+    public function change_column($table_name, $column_name, $params)
+    {
+        $this->log("Changing column '$column_name' in table '$table_name'...");
         $ret = $this->driver->change_column($table_name, $column_name, $params);
+        $this->log("DONE<br />");
         return $ret;
     }
-
+    
     /**
      * Remove a column from a table
      *
@@ -215,9 +196,11 @@ class Migration {
      * @param   string  Name of the column
      * @return  bool
      */
-    public function remove_column($table_name, $column_name) {
-        $this->change_exception();
+    public function remove_column($table_name, $column_name)
+    {
+        $this->log("Removing column '$column_name' in table '$table_name'...");
         $ret = $this->driver->remove_column($table_name, $column_name);
+        $this->log("DONE<br />");
         return $ret;
     }
 
@@ -230,13 +213,11 @@ class Migration {
      * @param   string  Type of the index (unique/normal/primary)
      * @return  bool
      */
-    public function add_index($table_name, $index_name, $columns, $index_type = 'normal') {
-        if (!$this->change_exists)
-            $ret = $this->driver->add_index($table_name, $index_name, $columns, $index_type);
-        else {
-            $this->change_exists = !$this->change_exists;
-            $ret = $this->driver->remove_index($table_name, $index_name);
-        }
+    public function add_index($table_name, $index_name, $columns, $index_type = 'normal')
+    {
+        $this->log("Adding index '$index_name' to table '$table_name'...");
+        $ret = $this->driver->add_index($table_name, $index_name, $columns, $index_type);
+        $this->log("DONE<br />");
         return $ret;
     }
 
@@ -247,9 +228,11 @@ class Migration {
      * @param   string  Name of the index
      * @return  bool
      */
-    public function remove_index($table_name, $index_name = NULL) {
-        $this->change_exception();
+    public function remove_index($table_name, $index_name = NULL)
+    {
+        $this->log("Removing index '$index_name' from table '$table_name'...");
         $ret = $this->driver->remove_index($table_name, $index_name);
+        $this->log("DONE<br />");
         return $ret;
     }
 
@@ -331,16 +314,18 @@ class Migration {
     }
 
     /**
-     * Run SQL query
-     * 
-     * @param string SQL-string
-     * @return bool
+     * Execute custom query
+     *
+     * @param   string  SQL query to execute
+     * @return  bool
      */
-    public function sql($query) {
+    public function sql($query)
+	{
         return $this->driver->run_query($query);
     }
 
-    public function commit() {
+    public function commit()
+    {
         $this->driver->commit();
     }
 

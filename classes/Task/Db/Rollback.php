@@ -1,9 +1,7 @@
-    
-<?php
+<?php defined('SYSPATH') or die('No direct script access.');
 
-defined('SYSPATH') or die('No direct script access.');
-
-class Task_Db_Rollback extends Minion_Task {
+class Task_Db_Rollback extends Minion_Task
+{
 
     protected $_options = array(
         'db' => 'default',
@@ -15,12 +13,16 @@ class Task_Db_Rollback extends Minion_Task {
      *
      * @return null
      */
-    protected function _execute(array $params) {
+    protected function _execute(array $params)
+    {
         $migrations = new Coolmigrations(TRUE);
         Database::$default = $params['db'];
-        try {
+        try
+        {
             $model = ORM::factory('Migration');
-        } catch (Database_Exception $a) {
+        }
+        catch (Database_Exception $a)
+        {
             Minion_CLI::write('Cool Migrations is not installed. Please Run the migrations.sql script in your mysql server');
             exit();
         }
