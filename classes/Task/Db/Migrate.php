@@ -14,7 +14,7 @@ class Task_Db_Migrate extends Minion_Task
      * @return null
      */
     protected function _execute(array $params)
-	{
+    {
         $migrations = new MigrationManager();
         Database::$default = $params['db'];
         $this->db = Database::instance();
@@ -26,6 +26,10 @@ class Task_Db_Migrate extends Minion_Task
              * Get platform from database config
              */
             $platform = strtolower($db_config['type']);
+            if ( 'mysqli' == $platform )
+            {
+                $platform = 'mysql';
+            }
 
             /**
              * Get SQL from file for selected platform

@@ -217,7 +217,7 @@ class Drivers_MySQL extends Drivers_Driver
         return $sql;
     }
 
-    public function belongs_to($from_table, $to_table, $from_column, $to_column = NULL) {
+    public function belongs_to($from_table, $to_table, $from_column = NULL, $to_column = NULL) {
         if ($to_column === NULL)
             $to_column = $this->primary_key;
         if ($from_column === NULL)
