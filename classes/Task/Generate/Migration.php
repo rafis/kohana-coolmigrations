@@ -19,7 +19,7 @@ class Task_Generate_Migration extends Minion_Task
      */
     protected function _execute(array $params)
     {
-        $migrations = new Coolmigrations(TRUE);
+        $migrations = new MigrationManager();
 
         $status = $migrations->generate_migration($params['name']);
 

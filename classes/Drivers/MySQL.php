@@ -3,6 +3,25 @@
 class Drivers_MySQL extends Drivers_Driver
 {
 
+    /**
+     *
+     * @var defaults 
+     */
+    protected $defaults = array(
+        'binary' => '',
+        'boolean' => '',
+        'date' => '',
+        'datetime' => '',
+        'decimal' => '10,2',
+        'float' => '',
+        'integer' => 11,
+        'primary_key' => '',
+        'string' => 255,
+        'text' => 4000,
+        'time' => '',
+        'timestamp' => '',
+    );
+    
     public function __construct($group, $db)
     {
         parent::__construct($group, $db);

@@ -1,14 +1,14 @@
-kohana-coolmigrations
-=====================
+kohana-migrations
+=================
 
-Rails inspired DB Migration module for kohana (native support postgresql &amp; mysql)
+Rails and Laravel inspired DB Migration module for kohana (native support postgresql &amp; mysql)
 
-Based on migrations-flexible(https://github.com/ferpetrelli/kohana-flexible-migrations).
+Based on kohana-coolmigrations(https://github.com/rainlabs/kohana-coolmigrations).
 
 ## Depending:
 
 * Minion tasks - CLI (Kohana module)
-* PostgreSQL database support if you need it (https://github.com/rainweezy/kohana-databasex)
+* PostgreSQL database support if you need it (https://github.com/cbandy/kohana-postgresql)
 
 ## List of command (console):
 
@@ -32,7 +32,6 @@ All possible methods are:
 
 * up     - migrate
 * down   - rollback
-* cahnge - migrate/rollback if possible
 
 All possible functions are:
 

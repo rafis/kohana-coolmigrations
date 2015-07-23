@@ -31,11 +31,12 @@ class Migration
     public function __construct($output = FALSE, $group = 'default')
     {
         $this->db = Database::instance($group);
-        $db_config = Kohana::$config->load('database');
+        $db_config = $this->db->get_config();
 
         // if need call driver with specific name
-        $platform = strtolower($db_config[$group]['type']);
-        switch ($platform) {
+        $platform = strtolower($db_config['type']);
+        switch ($platform)
+        {
             case 'mysql':
             case 'mysqli':
                 $platform = 'MySQL';
@@ -56,7 +57,9 @@ class Migration
     protected function log($string)
     {
         if ($this->output)
-            echo $string;
+        {
+            Minion_CLI::write($string);
+        }
     }
     
     public function up()
@@ -106,6 +109,7 @@ class Migration
         $this->log("Creating table '$table_name'...");
         $ret = $this->driver->create_table($table_name, $fields, $primary_key);
         $this->log("DONE<br />");
+        
         return $ret;
     }
 
@@ -120,6 +124,7 @@ class Migration
         $this->log("Dropping table '$table_name'...");
         $ret = $this->driver->drop_table($table_name);
         $this->log("DONE<br />");
+        
         return $ret;
     }
 
@@ -135,6 +140,7 @@ class Migration
         $this->log("Renaming table '$old_name' to '$new_name'...");
         $ret = $this->driver->rename_table($old_name, $new_name);
         $this->log("DONE<br />");
+        
         return $ret;
     }
     
@@ -154,6 +160,7 @@ class Migration
         $this->log("Adding column '$column_name' to table '$table_name'...");
         $ret = $this->driver->add_column($table_name, $column_name, $params);
         $this->log("DONE<br />");
+        
         return $ret;
     }
     
@@ -170,6 +177,7 @@ class Migration
         $this->log("Renaming column '$column_name' in table '$table_name' to '$new_column_name'...");
         $ret = $this->driver->rename_column($table_name, $column_name, $new_column_name, $params);
         $this->log("DONE<br />");
+        
         return $ret;
     }
     
@@ -186,6 +194,7 @@ class Migration
         $this->log("Changing column '$column_name' in table '$table_name'...");
         $ret = $this->driver->change_column($table_name, $column_name, $params);
         $this->log("DONE<br />");
+        
         return $ret;
     }
     
@@ -201,6 +210,7 @@ class Migration
         $this->log("Removing column '$column_name' in table '$table_name'...");
         $ret = $this->driver->remove_column($table_name, $column_name);
         $this->log("DONE<br />");
+        
         return $ret;
     }
 
@@ -218,6 +228,7 @@ class Migration
         $this->log("Adding index '$index_name' to table '$table_name'...");
         $ret = $this->driver->add_index($table_name, $index_name, $columns, $index_type);
         $this->log("DONE<br />");
+        
         return $ret;
     }
 
@@ -233,6 +244,7 @@ class Migration
         $this->log("Removing index '$index_name' from table '$table_name'...");
         $ret = $this->driver->remove_index($table_name, $index_name);
         $this->log("DONE<br />");
+        
         return $ret;
     }
 
@@ -245,13 +257,18 @@ class Migration
      * @param string $from_column if NULL then is fk_#{$to_table}_#{$to_column}
      * @return bool
      */
-    public function belongs_to($from_table, $to_table, $to_column = NULL, $from_column = NULL) {
+    public function belongs_to($from_table, $to_table, $to_column = NULL, $from_column = NULL)
+    {
         if (!$this->change_exists)
+        {
             $ret = $this->driver->belongs_to($from_table, $to_table, $to_column, $from_column);
-        else {
+        }
+        else
+        {
             $constraint = 'fk_' . $to_table . '_' . $from_column;
             $ret = $this->driver->remove_index($from_table, $constraint);
         }
+        
         return $ret;
     }
 
@@ -264,8 +281,10 @@ class Migration
      * @param string $to_column
      * @return bool
      */
-    public function has_one($from_table, $to_table, $from_column = NULL, $to_column = NULL) {
+    public function has_one($from_table, $to_table, $from_column = NULL, $to_column = NULL)
+    {
         $ret = $this->driver->has_one($from_table, $to_table, $from_column, $to_column);
+        
         return $ret;
     }
 
@@ -277,9 +296,11 @@ class Migration
      * @param string $trough_table
      * @return bool
      */
-    public function has_one_trough($from_table, $to_table, $trough_table) {
+    public function has_one_trough($from_table, $to_table, $trough_table)
+    {
         $this->change_exception();
         $ret = $this->driver->has_one_trough($from_table, $to_table, $trough_table);
+        
         return $ret;
         // remove columns $from_table and $trough_table
     }
@@ -292,9 +313,11 @@ class Migration
      * @param string $trough_table
      * @return bool
      */
-    public function has_many_trough($from_table, $to_table, $trough_table) {
+    public function has_many_trough($from_table, $to_table, $trough_table)
+    {
         $this->change_exception();
         $ret = $this->driver->has_many_trough($from_table, $to_table, $trough_table);
+        
         return $ret;
         // remove columns $trough_table
     }
@@ -306,9 +329,11 @@ class Migration
      * @param string $to_table
      * @return bool
      */
-    public function has_many($from_table, $to_table) {
+    public function has_many($from_table, $to_table)
+    {
         $this->change_exception();
         $ret = $this->driver->has_many($from_table, $to_table);
+        
         return $ret;
         // drop table
     }

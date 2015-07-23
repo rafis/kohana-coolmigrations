@@ -2,8 +2,8 @@
 
 class <?php echo $params['migration_name'] ?> extends Migration
 {
-  public function change()
-  {
-      // $this->rename_table('<?php echo $params['table_name'] ?>', 'new_table_name');
-  }
+    public function change()
+    {
+        // $this->rename_table('<?php echo $params['table_name'] ?>', 'new_table_name');
+    }
 }

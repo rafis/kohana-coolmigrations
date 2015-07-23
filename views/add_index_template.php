@@ -2,8 +2,8 @@
 
 class <?php echo $params['migration_name'] ?> extends Migration
 {
-  public function change()
-  {
-      // $this->add_index('<?php echo $params['table_name'] ?>', 'column', 'index_name');
-  }
+    public function change()
+    {
+        // $this->add_index('<?php echo $params['table_name'] ?>', 'column', 'index_name');
+    }
 }

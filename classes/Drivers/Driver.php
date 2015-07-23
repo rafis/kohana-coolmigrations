@@ -8,85 +8,86 @@ abstract class Drivers_Driver
      * @var array
      */
     protected $types = array(
+        'big_primary_key' => array(
+            'MySQL' => 'big int primary key NOT NULL AUTO_INCREMENT',
+            'PostgreSQL' => 'bigserial primary key',
+            'length' => false,
+        ),
+        'big_integer' => array(
+            'MySQL' => 'big int',
+            'PostgreSQL' => 'bigint',
+            'length' => true,
+        ),
         'binary' => array(
             'MySQL' => '',
             'PostgreSQL' => 'bytea',
-            'length' => false
+            'length' => false,
         ),
         'boolean' => array(
             'MySQL' => 'tinyint(1)',
             'PostgreSQL' => 'boolean',
-            'length' => false
+            'length' => false,
+        ),
+        'character' => array(
+            'MySQL' => 'character',
+            'PostgreSQL' => 'character',
+            'length' => true,
         ),
         'date' => array(
             'MySQL' => 'date',
             'PostgreSQL' => 'date',
-            'length' => false
+            'length' => false,
         ),
         'datetime' => array(
             'MySQL' => 'datetime',
             'PostgreSQL' => 'timestamp without time zone',
-            'length' => false
+            'length' => false,
         ),
         'decimal' => array(
             'MySQL' => 'numeric',
             'PostgreSQL' => 'numeric',
-            'length' => true
+            'length' => true,
         ),
         'float' => array(
             'MySQL' => 'float',
             'PostgreSQL' => 'float',
-            'length' => true
+            'length' => true,
         ),
         'integer' => array(
             'MySQL' => 'int',
             'PostgreSQL' => 'integer',
-            'length' => true
+            'length' => true,
+        ),
+        'inet' => array(
+            'MySQL' => 'varchar(45)',
+            'PostgreSQL' => 'inet',
+            'length' => false,
         ),
         'primary_key' => array(
             'MySQL' => 'int primary key NOT NULL AUTO_INCREMENT',
             'PostgreSQL' => 'serial primary key',
-            'length' => false
+            'length' => false,
         ),
         'string' => array(
             'MySQL' => 'varchar',
             'PostgreSQL' => 'character varying',
-            'length' => true
+            'length' => true,
         ),
         'text' => array(
             'MySQL' => 'text',
             'PostgreSQL' => 'text',
-            'length' => true
+            'length' => true,
         ),
         'time' => array(
             'MySQL' => 'time',
             'PostgreSQL' => 'time with time zone',
-            'length' => false
+            'length' => false,
         ),
         'timestamp' => array(
             'MySQL' => 'timestamp',
             'PostgreSQL' => 'timestamp with time zone',
-            'length' => false
+            'length' => false,
         ),
-    );
-
-    /**
-     *
-     * @var defaults 
-     */
-    protected $defaults = array(
-        'binary' => '',
-        'boolean' => '',
-        'date' => '',
-        'datetime' => '',
-        'decimal' => 11,
-        'float' => 11,
-        'integer' => 11,
-        'primary_key' => '',
-        'string' => 255,
-        'text' => 5000,
-        'time' => '',
-        'timestamp' => '',
     );
 
     /**
@@ -129,30 +130,30 @@ abstract class Drivers_Driver
      *
      * $fields:
      *
-     * 		Associative array containing the name of the field as a key and the
-     * 		value could be either a string indicating the type of the field, or an
-     * 		array containing the field type at the first position and any optional
-     * 		arguments the field might require in the remaining positions.
-     * 		Refer to the TYPES function for valid type arguments.
-     * 		Refer to the FIELD_ARGUMENTS function for valid optional arguments for a
-     * 		field.
+     *      Associative array containing the name of the field as a key and the
+     *      value could be either a string indicating the type of the field, or an
+     *      array containing the field type at the first position and any optional
+     *      arguments the field might require in the remaining positions.
+     *      Refer to the TYPES function for valid type arguments.
+     *      Refer to the FIELD_ARGUMENTS function for valid optional arguments for a
+     *      field.
      *
      * @example
      *
-     * 		create_table (
-     * 			'blog',
-     * 			array (
-     * 				'title' => array ( 'string[50]', 'default' => "The blog's title." ),
-     * 				'date' => 'date',
-     * 				'content' => 'text'
-     * 			)
-     * 		)
+     *      create_table (
+     *          'blog',
+     *          array (
+     *              'title' => array ( 'string[50]', 'default' => "The blog's title." ),
+     *              'date' => 'date',
+     *              'content' => 'text'
+     *          )
+     *      )
      *
-     * @param	string   Name of the table to be created
-     * @param	array
-     * @param	mixed    Primary key, false if not desired, not specified sets to 'id' column.
+     * @param   string   Name of the table to be created
+     * @param   array
+     * @param   mixed    Primary key, false if not desired, not specified sets to 'id' column.
      *                   Will be set to auto_increment by default.
-     * @return	boolean
+     * @return  boolean
      */
     abstract public function create_table($table_name, $fields, $primary_key = TRUE);
 
@@ -256,7 +257,8 @@ abstract class Drivers_Driver
      * @param string $to_column
      * @return bool
      */
-    public function has_one($from_table, $to_table, $from_column = NULL, $to_column = NULL) {
+    public function has_one($from_table, $to_table, $from_column = NULL, $to_column = NULL)
+    {
         return $this->belongs_to($to_table, $from_table, $from_column, $to_column);
     }
 
@@ -268,10 +270,12 @@ abstract class Drivers_Driver
      * @param string $trough_table
      * @return bool
      */
-    public function has_one_trough($from_table, $to_table, $trough_table) {
+    public function has_one_trough($from_table, $to_table, $trough_table)
+    {
         $result = true;
         $result = $result && $this->belongs_to($to_table, $trough_table);
         $result = $result && $this->belongs_to($trough_table, $from_table);
+        
         return $result;
     }
 
@@ -283,10 +287,12 @@ abstract class Drivers_Driver
      * @param string $trough_table
      * @return bool
      */
-    public function has_many_trough($from_table, $to_table, $trough_table) {
+    public function has_many_trough($from_table, $to_table, $trough_table)
+    {
         $result = true;
         $result = $result && $this->belongs_to($trough_table, $from_table);
         $result = $result && $this->belongs_to($trough_table, $to_table);
+        
         return $result;
     }
 
@@ -297,12 +303,14 @@ abstract class Drivers_Driver
      * @param string $to_table
      * @return bool
      */
-    public function has_many($from_table, $to_table) {
+    public function has_many($from_table, $to_table)
+    {
         $result = true;
         $trough_table = $from_table . '_' . $to_table;
         $result = $result && $this->create_table($trough_table, array());
         $result = $result && $this->belongs_to($trough_table, $from_table);
         $result = $result && $this->belongs_to($trough_table, $to_table);
+        
         return $result;
     }
 
@@ -313,14 +321,19 @@ abstract class Drivers_Driver
      */
     public function run_query($sql)
     {
-        try {
+        try
+        {
             $test = $this->db->query($this->group, $sql, false);
-        } catch (Database_Exception $e) {
+        }
+        catch (Database_Exception $e)
+        {
             // Kohana::log('error', 'Migration Failed: ' . $e);
             echo $e->getMessage();
             exit();
+            
             return FALSE;
         }
+        
         return TRUE;
     }
 
@@ -333,7 +346,7 @@ abstract class Drivers_Driver
     {
         if ( ! isset($this->types[$type][$platform]) )
         {
-            return false;
+            throw new InvalidArgumentException('Unsupported type `' . $type . '\'');
         }
 
         return $this->types[$type][$platform];
@@ -345,9 +358,11 @@ abstract class Drivers_Driver
      * @param string type
      * @return bool, int
      */
-    protected function is_length($type) {
+    protected function is_length($type)
+    {
         if (isset($this->types[$type]['length']))
             return $this->types[$type]['length'];
+        
         return false;
     }
 
@@ -357,7 +372,8 @@ abstract class Drivers_Driver
      * @param string value
      * @return string
      */
-    protected function quote($value) {
+    protected function quote($value)
+    {
         return ('\'' . $value . '\'');
     }
 
@@ -367,8 +383,9 @@ abstract class Drivers_Driver
      * @param type $type
      * @return int
      */
-    protected function getDefault($type) {
-        $default = $this->defaults[$type];
+    protected function getDefault($type)
+    {
+        $default = Arr::get($this->defaults, $type);
         if (empty($default))
             return 0;
         else
@@ -384,12 +401,14 @@ abstract class Drivers_Driver
      * @return string
      * @throws Kohana_Exception
      */
-    protected function compile_column($field_name, $params, $driver) {
-        if (empty($params)) {
+    protected function compile_column($field_name, $params, $driver)
+    {
+        if (empty($params))
+        {
             throw new Kohana_Exception('migrations.missing_argument');
         }
 
-        $sql = $field_name;
+        $sql = $this->db->quote_column($field_name);
 
         $params = (array) $params;
         $query_params = array(
@@ -400,15 +419,19 @@ abstract class Drivers_Driver
         $type = 'integer';
         $length = 0;
 
-        foreach ($params as $key => $param) {
-            if ($key === 0) {
+        foreach ($params as $key => $param)
+        {
+            if ($key === 0)
+            {
                 $query_params['type'] = $this->is_type($param, $driver);
                 $type = $param;
-                if ($param === 'primary_key')
+                if ( in_array($param, array('primary_key', 'big_primary_key')) )
                     $query_params['null'] = '';
             }
-            else {
-                switch ($key) {
+            else
+            {
+                switch ($key)
+                {
                     case 'type':
                         $query_params['type'] = $this->is_type($param, $driver);
                         break;
@@ -429,12 +452,15 @@ abstract class Drivers_Driver
             }
         }
 
-        foreach ($query_params as $key => $param) {
-            if ($param !== '') {
+        foreach ($query_params as $key => $param)
+        {
+            if ($param !== '')
+            {
                 if ($key === 'default')
                     $sql .= ' default';
                 $sql .= ' ' . $param;
-                if ($key === 'type') {
+                if ($key === 'type')
+                {
                     if ($length == 0)
                         $length = $this->getDefault($type);
                     if ($length > 0)
