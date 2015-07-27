@@ -44,7 +44,7 @@ class Drivers_MySQL extends Drivers_Driver
 
     public function create_table($table_name, $fields, $primary_key = TRUE)
     {
-        $sql = "CREATE TABLE `$table_name` (";
+        $sql = "CREATE TABLE " . $this->db->quote_table($table_name) . " (";
 
         // add a default id column if we don't say not to
         if ($primary_key === TRUE)
@@ -78,6 +78,7 @@ class Drivers_MySQL extends Drivers_Driver
     public function add_column($table_name, $column_name, $params)
     {
         $sql = "ALTER TABLE `$table_name` ADD COLUMN " . $this->compile_column($column_name, $params, 'MySQL');
+
         return $this->run_query($sql);
     }
 
@@ -88,12 +89,14 @@ class Drivers_MySQL extends Drivers_Driver
             $params = $this->get_column($table_name, $column_name);
         }
         $sql = "ALTER TABLE `$table_name` CHANGE `$column_name` " . $this->compile_column($new_column_name, $params, 'MySQL');
+
         return $this->run_query($sql);
     }
 
     public function change_column($table_name, $column_name, $params)
     {
         $sql = "ALTER TABLE `$table_name` MODIFY " . $this->compile_column($column_name, $params, 'MySQL');
+
         return $this->run_query($sql);
     }
 
@@ -115,15 +118,16 @@ class Drivers_MySQL extends Drivers_Driver
             throw new Exception('migrations.bad_index_type', $index_type);
         }
 
-        $sql = "ALTER TABLE `$table_name` ADD $type `$index_name` (";
+        $sql = "ALTER TABLE " . $this->db->quote_table($table_name) . " ADD $type " . ($index_name ? $this->db->quote_identifier($index_name) : "") . " (";
 
         foreach ((array) $columns as $column)
         {
-            $sql .= " `$column`,";
+            $sql .= $this->db->quote_column($column) . ", ";
         }
 
-        $sql = rtrim($sql, ',');
-        $sql .= ')';
+        $sql = rtrim($sql, ", ");
+        $sql .= ")";
+
         return $this->run_query($sql);
     }
 
@@ -217,21 +221,25 @@ class Drivers_MySQL extends Drivers_Driver
         return $sql;
     }
 
-    public function belongs_to($from_table, $to_table, $from_column = NULL, $to_column = NULL) {
+    public function belongs_to($from_table, $to_table, $from_column = NULL, $to_column = NULL)
+    {
         if ($to_column === NULL)
             $to_column = $this->primary_key;
         if ($from_column === NULL)
             $from_column = $to_table . '_' . $to_column;
         $constraint = 'fk_' . $from_column;
         $sql = "ALTER TABLE $from_table ADD CONSTRAINT $constraint FOREIGN KEY ($from_column) REFERENCES $to_table ($to_column) ON DELETE RESTRICT ON UPDATE RESTRICT;";
+
         return $this->run_query($sql);
     }
 
-    protected function get_common_type($type) {
+    protected function get_common_type($type)
+    {
         $length = '';
         if (strpos($type, '(') > 0)
             $length = substr($type, strpos($type, '(') + 1, strpos($type, ')') - strpos($type, '(') - 1);
         $type = substr($type, 0, strpos($type, '('));
+
         foreach ($this->types as $key => $value) {
             if ($value['MySQL'] === trim($type))
                 return array(
@@ -239,6 +247,7 @@ class Drivers_MySQL extends Drivers_Driver
                     'length' => $length
                 );
         }
+
         return array(
             'type' => '',
             'length' => ''

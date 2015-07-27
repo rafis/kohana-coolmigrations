@@ -9,11 +9,11 @@
  *
  * Based on Migrations module by Jamie Madill
  *
- * @package		Migrations
+ * @package     Migrations
  * @author      Vladimir Zyablitskiy
- * @author 		Matías Montes
- * @author 		Jamie Madill
- * @author    	Fernando Petrelli
+ * @author      Matías Montes
+ * @author      Jamie Madill
+ * @author      Fernando Petrelli
  */
 class Kohana_MigrationManager
 {
@@ -92,9 +92,9 @@ class Kohana_MigrationManager
         Database::$default = $group;
         //Get last executed migration
         if (strtolower($step) === 'all')
-            $model = ORM::factory('Migration')->order_by('created_at', 'DESC')->order_by('hash', 'DESC')->find_all();
+            $model = ORM::factory('Migration')->order_by('hash', 'DESC')->find_all();
         else
-            $model = ORM::factory('Migration')->order_by('created_at', 'DESC')->order_by('hash', 'DESC')->limit((int) $step)->find_all();
+            $model = ORM::factory('Migration')->order_by('hash', 'DESC')->limit((int) $step)->find_all();
         $messages = array();
 
         $common_time = 0;
