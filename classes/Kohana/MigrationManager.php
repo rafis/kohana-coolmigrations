@@ -143,7 +143,7 @@ class Kohana_MigrationManager
      */
     public function get_timestamp()
     {
-        return date('Ymd\_His');
+        return date('YmdHis');
     }
 
     /**
@@ -157,10 +157,11 @@ class Kohana_MigrationManager
         foreach ($migrations as $i => $file)
         {
             $name = basename($file, EXT);
-            if (!preg_match('/^\d{8}_\d{6}_(\w+)$/', $name)) //Check filename format
+            if (!preg_match('/^\d{8}\d{6}_(\w+)$/', $name)) //Check filename format
                 unset($migrations[$i]);
         }
         sort($migrations);
+        
         return $migrations;
     }
 
@@ -203,6 +204,7 @@ class Kohana_MigrationManager
             fwrite($file, $view);
             fclose($file);
             chmod($config['path'] . $file_name, 0770);
+            
             return 0;
         }
         catch (Exception $e)
@@ -311,6 +313,7 @@ class Kohana_MigrationManager
                         }
                     }
                 }
+                
                 return $result;
             }
         }
@@ -329,9 +332,10 @@ class Kohana_MigrationManager
         $keys = array();
         foreach ($migrations as $migration)
         {
-            $sub_migration = substr(basename($migration, EXT), 0, strlen('YYYYmmdd_HHiiss'));
-            $keys = Arr::merge($keys, array($sub_migration => substr(basename($migration, EXT), strlen('YYYYmmdd_HHiiss_'))));
+            $sub_migration = substr(basename($migration, EXT), 0, strlen('YYYYmmddHHiiss'));
+            $keys = Arr::merge($keys, array($sub_migration => substr(basename($migration, EXT), strlen('YYYYmmddHHiiss_'))));
         }
+        
         return $keys;
     }
 
@@ -354,7 +358,7 @@ class Kohana_MigrationManager
         $name = basename($f[0], EXT);
 
         // Filename validation
-        if (!preg_match('/^\d{8}_\d{6}_(\w+)$/', $name, $match))
+        if (!preg_match('/^\d{8}\d{6}_(\w+)$/', $name, $match))
             throw new Kohana_Exception('Invalid filename :file', array(':file' => $file));
 
         $match[1] = strtolower($match[1]);
@@ -374,6 +378,7 @@ class Kohana_MigrationManager
     protected function method_defined($object, $method_name)
     {
         $ReflectionClass = new ReflectionClass($object);
+        
         return method_exists($object, $method_name) && (strtolower($ReflectionClass->getMethod($method_name)->class) ===
                 strtolower((is_object($object) ? get_class($object) : $object)));
     }

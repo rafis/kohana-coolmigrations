@@ -31,7 +31,7 @@ class Migration
     public function __construct($output = FALSE, $group = 'default')
     {
         $this->db = Database::instance($group);
-        $db_config = $this->db->get_config();
+        $db_config = Kohana::$config->load('database.' . $group)->as_array();
 
         // if need call driver with specific name
         $platform = strtolower($db_config['type']);
@@ -344,11 +344,16 @@ class Migration
      * @param   string  SQL query to execute
      * @return  bool
      */
-    public function sql($query)
+    public function run_query($query)
 	{
         return $this->driver->run_query($query);
     }
 
+    public function set_schema($schema)
+    {
+        return $this->driver->set_schema($schema);
+    }
+    
     public function commit()
     {
         $this->driver->commit();

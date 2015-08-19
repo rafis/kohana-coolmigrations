@@ -115,7 +115,12 @@ class Drivers_MySQL extends Drivers_Driver
         $type = Arr::get($index_types, $index_type);
         if ( null === $type )
         {
-            throw new Exception('migrations.bad_index_type', $index_type);
+            throw new InvalidArgumentException('Bad index type "' . $index_type . '"');
+        }
+        
+        if ( 'primary' == $index_type )
+        {
+            $index_name = null;
         }
 
         $sql = "ALTER TABLE " . $this->db->quote_table($table_name) . " ADD $type " . ($index_name ? $this->db->quote_identifier($index_name) : "") . " (";

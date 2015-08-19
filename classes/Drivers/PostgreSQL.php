@@ -28,7 +28,7 @@ class Drivers_PostgreSQL extends Drivers_Driver
     {
         parent::__construct($group, $db);
 
-        $db_config = $db->get_config();
+        $db_config = Kohana::$config->load('database.' . $group);
         if ( ! empty($db_config['schema']) )
         {
             $this->schema = $db_config['schema'];
@@ -52,6 +52,18 @@ class Drivers_PostgreSQL extends Drivers_Driver
     }
 
     /**
+     * Set schema name or 'public' if $schema_name is null
+     * @param type $schema_name
+     */
+    public function set_schema($schema_name = NULL)
+    {
+        if (empty($schema_name))
+            $this->schema = 'public';
+        else
+            $this->schema = $schema_name;
+    }
+    
+    /**
      * Create schema (Postgres function)
      * @param type $schema_name
      * @return boolean
@@ -60,7 +72,7 @@ class Drivers_PostgreSQL extends Drivers_Driver
     {
         $sql = "CREATE SCHEMA $schema_name;";
         
-        $this->schema = $schema_name;
+        $this->set_schema($schema_name);
         
         return $this->run_query($sql);
     }
@@ -125,6 +137,7 @@ class Drivers_PostgreSQL extends Drivers_Driver
     public function change_column($table_name, $column_name, $params)
     {
         $sql = "ALTER TABLE $this->schema.$table_name ALTER COLUMN " . $this->compile_column($column_name, $params, 'PostgreSQL');
+        
         return $this->run_query($sql);
     }
 
@@ -135,25 +148,31 @@ class Drivers_PostgreSQL extends Drivers_Driver
 
     public function add_index($table_name, $index_name, $columns, $index_type = 'normal')
     {
-        switch ($index_type)
+        $index_types = array(
+            'normal' => '',
+            'unique' => 'UNIQUE',
+            'primary' => 'UNIQUE',
+        );
+        $type = Arr::get($index_types, $index_type);
+        if ( null === $type )
         {
-            case 'normal': $type = '';
-                break;
-            case 'unique': $type = 'UNIQUE';
-                break;
-
-            default: throw new Exception('migrations.bad_index_type', $index_type);
+            throw new InvalidArgumentException('Bad index type "' . $index_type . '"');
         }
 
-        $sql = "CREATE $type INDEX $index_name ON $this->schema.$table_name (";
-
+        $quoted_columns = array();
         foreach ((array) $columns as $column)
         {
-            $sql .= " $column,";
+            $quoted_columns[] = $this->db->quote_column($column);
         }
-
-        $sql = rtrim($sql, ',');
-        $sql .= ')';
+        $quoted_columns = implode(', ', $quoted_columns);
+        
+        $sql = "CREATE $type INDEX " . $this->db->quote_identifier($index_name) . " ON " . $this->db->quote_table($this->schema . "." . $table_name) . " (" . $quoted_columns . ")";
+        
+        if ( 'primary' == $index_type )
+        {
+            $sql = "ALTER TABLE ONLY " . $this->db->quote_table($this->schema . "." . $table_name) . " ADD CONSTRAINT " . $this->db->quote_identifier($index_name) . " PRIMARY KEY (" . $quoted_columns . ")";
+        }
+        
         return $this->run_query($sql);
     }
 
@@ -172,6 +191,7 @@ class Drivers_PostgreSQL extends Drivers_Driver
         // get column information from $to_column
         // add column
         $sql = "ALTER TABLE $from_table ADD CONSTRAINT $constraint FOREIGN KEY ($from_column) REFERENCES $to_table ($to_column) MATCH FULL;";
+        
         return $this->run_query($sql);
     }
 
