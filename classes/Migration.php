@@ -31,7 +31,7 @@ class Migration
     public function __construct($output = FALSE, $group = 'default')
     {
         $this->db = Database::instance($group);
-        $db_config = Kohana::$config->load('database.' . $group)->as_array();
+        $db_config = Kohana::$config->load('database.' . $group);
 
         // if need call driver with specific name
         $platform = strtolower($db_config['type']);
