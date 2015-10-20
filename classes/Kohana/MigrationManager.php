@@ -51,7 +51,7 @@ class Kohana_MigrationManager
         }
 
         if (count($migration_keys) > 0)
-         {
+        {
             if (strtolower($step) !== 'all')
                 $migration_keys = array_slice($migration_keys, 0, (int) $step);
             $common_time = 0;
@@ -176,7 +176,7 @@ class Kohana_MigrationManager
         try
         {
             //Creates the migration file with the timestamp and the name from params
-            $file_name = $this->get_timestamp() . '_' . $migration_name . '.php';
+            $file_name = $this->get_timestamp() . '_' . $migration_name . EXT;
             $config = $this->get_config();
             $file = fopen($config['path'] . $file_name, 'w+');
 

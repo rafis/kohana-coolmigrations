@@ -18,7 +18,7 @@ class Task_Db_Migrate extends Minion_Task
         $migrations = new MigrationManager();
         Database::$default = $params['db'];
         $this->db = Database::instance();
-        $db_config = Kohana::$config->load('database.' . Database::$default);
+        $db_config = Kohana::$config->load('database')->{$params['db']};
 
         if ( ! ORM::factory('Migration')->is_installed() )
         {

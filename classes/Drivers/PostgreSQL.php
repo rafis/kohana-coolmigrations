@@ -28,7 +28,7 @@ class Drivers_PostgreSQL extends Drivers_Driver
     {
         parent::__construct($group, $db);
 
-        $db_config = Kohana::$config->load('database.' . $group);
+        $db_config = Kohana::$config->load('database')->$group;
         if ( ! empty($db_config['schema']) )
         {
             $this->schema = $db_config['schema'];

@@ -48,9 +48,14 @@ abstract class Drivers_Driver
             'PostgreSQL' => 'numeric',
             'length' => true,
         ),
+        'double' => array(
+            'MySQL' => 'double',
+            'PostgreSQL' => 'double precision',
+            'length' => true,
+        ),
         'float' => array(
             'MySQL' => 'float',
-            'PostgreSQL' => 'float',
+            'PostgreSQL' => 'real',
             'length' => true,
         ),
         'integer' => array(
@@ -109,7 +114,7 @@ abstract class Drivers_Driver
         $this->group = $group;
         $this->db = $db;
 
-        if (isset($db_config[$group]['primary_key']))
+        if ( ! empty($db_config[$group]['primary_key']))
             $this->primary_key = $db_config[$group]['primary_key'];
     }
 
