@@ -109,13 +109,13 @@ abstract class Drivers_Driver
      */
     public function __construct($group, $db)
     {
-        $db_config = Kohana::$config->load('database');
+        $db_config = Kohana::$config->load('database')->$group;
 
         $this->group = $group;
         $this->db = $db;
 
-        if ( ! empty($db_config[$group]['primary_key']))
-            $this->primary_key = $db_config[$group]['primary_key'];
+        if ( ! empty($db_config['primary_key']))
+            $this->primary_key = $db_config['primary_key'];
     }
 
     /**
@@ -481,7 +481,10 @@ abstract class Drivers_Driver
      * Start transaction
      * 
      */
-    abstract public function begin();
+    public function begin()
+    {
+        $this->db->begin();
+    }
     
     /**
      * End Transaction
@@ -489,7 +492,7 @@ abstract class Drivers_Driver
      */
     public function commit()
     {
-        $this->run_query('COMMIT');
+        $this->db->commit();
     }
 
 }

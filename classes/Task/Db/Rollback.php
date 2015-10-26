@@ -24,27 +24,7 @@ class Task_Db_Rollback extends Minion_Task
             exit();
         }
 
-        $messages = $migrations->rollback($params['db'], $params['step']);
-
-        if (empty($messages))
-        {
-            Minion_CLI::write("There's no migration to rollback");
-        }
-        else
-        {
-            foreach ($messages as $message)
-            {
-                if (key($message) == 0)
-                {
-                    Minion_CLI::write($message[0]);
-                }
-                else
-                {
-                    Minion_CLI::write($message[key($message)]);
-                    Minion_CLI::write("ERROR");
-                }
-            }
-        }
+        $migrations->rollback($params['db'], $params['step']);
     }
 
 }

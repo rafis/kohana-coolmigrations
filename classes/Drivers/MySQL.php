@@ -33,15 +33,6 @@ class Drivers_MySQL extends Drivers_Driver
         $this->commit();
     }
     
-    /**
-     * Start transaction
-     * 
-     */
-    public function begin()
-    {
-        $this->run_query('START TRANSACTION');
-    }
-
     public function create_table($table_name, $fields, $primary_key = TRUE)
     {
         $sql = "CREATE TABLE " . $this->db->quote_table($table_name) . " (";

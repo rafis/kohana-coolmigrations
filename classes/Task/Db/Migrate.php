@@ -45,28 +45,7 @@ class Task_Db_Migrate extends Minion_Task
             Minion_CLI::write($msg);
         }
 
-        $messages = $migrations->migrate($params['db'], $params['step']);
-
-        if (empty($messages))
-        {
-            Minion_CLI::write("Nothing to migrate");
-        }
-        else
-        {
-            foreach ($messages as $message)
-            {
-                if (key($message) == 0)
-                {
-                    Minion_CLI::write($message[0]);
-                    Minion_CLI::write("OK");
-                }
-                else
-                { 
-                    Minion_CLI::write($message[key($message)]);
-                    Minion_CLI::write("ERROR");
-                }
-            }
-        }
+        $migrations->migrate($params['db'], $params['step']);
     }
 
 }

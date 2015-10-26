@@ -39,7 +39,6 @@ class Kohana_MigrationManager
         Database::$default = $group;
         $migration_keys = $this->get_migration_keys();
         $migrations = ORM::factory('Migration')->find_all();
-        $messages = array();
 
         //Remove executed migrations from queue
         foreach ($migrations as $migration)
@@ -50,37 +49,40 @@ class Kohana_MigrationManager
             }
         }
 
-        if (count($migration_keys) > 0)
+        if ( ! count($migration_keys))
         {
-            if (strtolower($step) !== 'all')
-                $migration_keys = array_slice($migration_keys, 0, (int) $step);
-            $common_time = 0;
-            foreach ($migration_keys as $key => $value)
-            {
-                $msg = "Executing migration: '" . $value . "' with hash: " . $key;
-                $interval = microtime(true);
-
-                try
-                {
-                    $migration_object = $this->load_migration($key, $group);
-                    $migration_object->up();
-                    $model = ORM::factory('Migration');
-                    $model->hash = $key;
-                    $model->name = $value;
-                    $model->save();
-                    $interval = microtime(true) - $interval;
-                    $common_time += $interval;
-                    $model ? $messages[] = array(0 => $msg) : $messages[] = array(1 => $msg);
-                    array_push($messages, array(Minion_CLI::color("----------- with $interval s -----------\n", 'green')));
-                }
-                catch (Database_Exception $e)
-                {
-                    $messages[] = array(1 => $msg . "\n" . $e->getMessage());
-                }
-            }
-            array_push($messages, array(Minion_CLI::color("\n----------- COMMON TIME IS $common_time s -----------", 'green')));
+            $this->message("Nothing to migrate");
+            return;
         }
-        return $messages;
+        
+        if (strtolower($step) !== 'all')
+            $migration_keys = array_slice($migration_keys, 0, (int) $step);
+        $total_time = 0;
+        foreach ($migration_keys as $key => $value)
+        {
+            $msg = "Executing migration: '" . $value . "' with hash: " . $key;
+            $this->message($msg);
+            $interval = microtime(true);
+
+            try
+            {
+                $migration_object = $this->load_migration($key, $group);
+                $migration_object->up();
+                $model = ORM::factory('Migration');
+                $model->hash = $key;
+                $model->name = $value;
+                $model->save();
+                $interval = microtime(true) - $interval;
+                $total_time += $interval;
+                $this->message(Minion_CLI::color("----------- with $interval s -----------\n", 'green'));
+            }
+            catch (Database_Exception $e)
+            {
+                $this->message_error($msg . "\n" . $e->getMessage());
+                break;
+            }
+        }
+        $this->message(Minion_CLI::color("\n----------- TOTAL TIME IS $total_time s -----------", 'green'));
     }
 
     /**
@@ -92,49 +94,40 @@ class Kohana_MigrationManager
         Database::$default = $group;
         //Get last executed migration
         if (strtolower($step) === 'all')
-            $model = ORM::factory('Migration')->order_by('hash', 'DESC')->find_all();
+            $migrations = ORM::factory('Migration')->order_by('hash', 'DESC')->find_all();
         else
-            $model = ORM::factory('Migration')->order_by('hash', 'DESC')->limit((int) $step)->find_all();
-        $messages = array();
+            $migrations = ORM::factory('Migration')->order_by('hash', 'DESC')->limit((int) $step)->find_all();
 
-        $common_time = 0;
-        foreach ($model as $key => $item)
+        if ( ! count($migrations))
         {
-            if ($item->loaded())
+            $this->message("There's no migration to rollback");
+            return;
+        }
+        
+        $total_time = 0;
+        foreach ($migrations as $key => $item)
+        {
+            $msg = "Migration '" . $item->name . "' with hash: " . $item->hash . ' was succefully "rollbacked"';
+            $this->message($msg);
+            $interval = microtime(true);
+            
+            try
             {
-                $interval = microtime(true);
-                try
-                {
-                    $migration_object = $this->load_migration($item->hash, $group);
-                    $migration_object->down();
+                $migration_object = $this->load_migration($item->hash, $group);
+                $migration_object->down();
 
-                    if ($item)
-                    {
-                        $interval = microtime(true) - $interval;
-                        $common_time += $interval;
-                        $msg = "Migration '" . $item->name . "' with hash: " . $item->hash . ' was succefully "rollbacked"';
-                        $messages[] = array(0 => $msg);
-                        array_push($messages, array(Minion_CLI::color("----------- with $interval s -----------\n", 'green')));
-                    }
-                    else
-                    {
-                        $messages[] = array(1 => "Error executing rollback");
-                    }
-                    $item->delete();
-                }
-                catch (Exception $e)
-                {
-                    $messages[] = array(1 => $e->getMessage());
-                }
+                $interval = microtime(true) - $interval;
+                $total_time += $interval;
+                $this->message(Minion_CLI::color("----------- with $interval s -----------\n", 'green'));
+                $item->delete();
             }
-            else
+            catch (Exception $e)
             {
-                $messages[] = array(1 => "There's no migration to rollback");
+                $this->message_error($e->getMessage());
+                break;
             }
         }
-        array_push($messages, array(Minion_CLI::color("\n----------- COMMON TIME IS $common_time s -----------", 'green')));
-
-        return $messages;
+        $this->message(Minion_CLI::color("\n----------- TOTAL TIME IS $total_time s -----------", 'green'));
     }
 
     /**
@@ -383,4 +376,21 @@ class Kohana_MigrationManager
                 strtolower((is_object($object) ? get_class($object) : $object)));
     }
 
+    protected function message($msg)
+    {
+        Minion_CLI::write($msg);
+    }
+    
+    protected function message_ok($msg)
+    {
+        $this->message($msg);
+        $this->message("OK");
+    }
+
+    protected function message_error($msg)
+    {
+        $this->message($msg);
+        $this->message("ERROR");
+    }
+    
 }

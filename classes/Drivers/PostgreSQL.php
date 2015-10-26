@@ -43,15 +43,6 @@ class Drivers_PostgreSQL extends Drivers_Driver
     }
 
     /**
-     * Start transaction
-     * 
-     */
-    public function begin()
-    {
-        $this->run_query('BEGIN');
-    }
-
-    /**
      * Set schema name or 'public' if $schema_name is null
      * @param type $schema_name
      */
